@@ -264,6 +264,13 @@ public:
 
 	virtual bool Map(int numSubLevels, int subLevel, nui::GILockedTexture* lockedTexture, nui::GILockFlags flags) override
 	{
+		// The backing texture may be created lazily on the render thread (see the deferred constructor),
+		// so a caller can try to map it before it exists.
+		if (!m_texture)
+		{
+			return false;
+		}
+
 #ifdef GTA_FIVE
 		rage::grcLockedTexture rlt;
 
@@ -300,6 +307,11 @@ public:
 
 	virtual void Unmap(nui::GILockedTexture* lockedTexture) override
 	{
+		if (!m_texture)
+		{
+			return;
+		}
+
 #ifdef GTA_FIVE
 		rage::grcLockedTexture rlt;
 		rlt.format = lockedTexture->format;
